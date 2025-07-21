@@ -4,7 +4,8 @@ import logging
 import discord
 
 from ai.intent_manager import init as init_intent_manager
-from ai.openai_client import init as init_openai
+from ai.openai_client import get_client as get_ai_client
+from ai.openai_client import init as init_ai
 from bot.client import AIDiscordBot
 from config.settings import DISCORD_TOKEN, OPENAI_API_KEY
 from utils.logger import HANDLER, HANDLER_LEVEL
@@ -12,20 +13,22 @@ from utils.logger import HANDLER, HANDLER_LEVEL
 
 class AmjkoAI:
     def __init__(self):
-        # TODO:
+        # Initialize AI client
+        init_ai(OPENAI_API_KEY)
+
+        # Intialize AI intent manager
+        init_intent_manager()
+
         # Initialize Discord bot
         self.bot = AIDiscordBot()
+
         # Initialize database manager
 
-        # Initialize AI client
-        init_openai(OPENAI_API_KEY)
-        init_intent_manager()
         # Initialize message handler
 
         # Initialize consent manager
 
     async def setup(self):
-        # TODO:
         # Create database tables
         # Test OpenAI connection
         # Set up Discord event handlers
@@ -33,11 +36,9 @@ class AmjkoAI:
         await self.bot.setup_hook()
 
     async def close_bot(self):
-        # TODO:
         pass
 
     async def cleanup(self):
-        # TODO:
         pass
 
     async def close(self):
