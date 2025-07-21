@@ -23,7 +23,7 @@ class Commands(commands.Cog):
         if not prompt:
             context.send(f"Please input something first")
         else:
-            response = await self.ai_client.ask(prompt)
+            response = await self.ai_client.message(prompt)
             if response is None:
                 response = "Someone tell Amjko there's a problem with my AI"
             await context.send(response)
