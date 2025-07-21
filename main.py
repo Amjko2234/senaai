@@ -3,15 +3,11 @@ import logging
 
 import discord
 
+from ai.intent_manager import init as init_intent_manager
 from ai.openai_client import init as init_openai
 from bot.client import AIDiscordBot
-
-# from bot.consent_manager import ...
-# from bot.message_handler import ...
 from config.settings import DISCORD_TOKEN, OPENAI_API_KEY
 from utils.logger import HANDLER, HANDLER_LEVEL
-
-# from database.db_manager import ...
 
 
 class AmjkoAI:
@@ -23,6 +19,7 @@ class AmjkoAI:
 
         # Initialize AI client
         init_openai(OPENAI_API_KEY)
+        init_intent_manager()
         # Initialize message handler
 
         # Initialize consent manager
