@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 import discord
+
 from ai.openai_client import init as init_openai
 from bot.client import AIDiscordBot
 
