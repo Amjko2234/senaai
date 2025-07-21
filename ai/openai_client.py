@@ -10,15 +10,43 @@ class OpenAIClient:
         response = await self.client.chat.completions.create(
             model=self.model,
             max_tokens=50,
-            messages=[{"role": "user", "content": prompt}],
+            messages=[
+                {
+                    "role": "system",
+                    "content": "your name is AmjkoAI. You may be address as that--AI or also OpenAI",
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+        return response.choices[0].message.content
+
+    async def message(self, prompt: str) -> str | None:
+        response = await self.client.chat.completions.create(
+            model=self.model,
+            max_tokens=100,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "your name is AmjkoAI. You may be address as that--AI or also OpenAI",
+                },
+                {"role": "user", "content": prompt},
+            ],
         )
         return response.choices[0].message.content
 
 
-client: OpenAIClient | None = None
+_client: OpenAIClient | None = None
 
 
-def init(api_key: str):
-    global client
-    if client is None:
-        client = OpenAIClient(api_key)
+def init(api_key: str) -> None:
+    global _client
+    if _client is None:
+        _client = OpenAIClient(api_key)
+
+    return
+
+
+def get_client() -> OpenAIClient:
+    if _client is None:
+        raise RuntimeError("OpenAI Client not initialized")
+    return _client

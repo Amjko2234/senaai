@@ -1,12 +1,13 @@
 import discord
 from discord.ext import commands
 
-from ai.openai_client import client as ai_client
+from ai.openai_client import get_client as get_ai_client
 
 
 class Commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.ai_client = get_ai_client()
 
     @commands.command()
     async def hello(self, context):
@@ -17,7 +18,7 @@ class Commands(commands.Cog):
         if not prompt:
             context.send(f"Please input something first")
         else:
-            response = await ai_client.ask(prompt)
+            response = await self.ai_client.ask(prompt)
             if response is None:
                 response = "Someone tell Amjko there's a problem with my AI"
             await context.send(response)
