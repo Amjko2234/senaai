@@ -1,18 +1,23 @@
-import discord
 from discord.ext import commands
 
 from ai.openai_client import get_client as get_ai_client
 
 
 class Commands(commands.Cog):
+    """Contains commands for the Discord bot"""
+
     def __init__(self, bot):
+        """Load Discord bot commands"""
+
         self.bot = bot
         self.ai_client = get_ai_client()
 
+    # !hello
     @commands.command()
     async def hello(self, context):
         await context.send(f"Hello {context.author.mention}!")
 
+    # !ask
     @commands.command()
     async def ask(self, context, *, prompt: str):
         if not prompt:
