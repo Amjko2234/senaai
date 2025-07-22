@@ -1,14 +1,15 @@
 import discord
 from discord.ext import commands
 
-from ai.intent_manager import get_manager as get_intent_manager
-from ai.openai_client import get_client as get_ai_client
+from ai.interface.ai_provider import AIProvider
+from ai.src.intent_manager import IntentManager
+from database.interface.database_provider import DatabaseProvider
 
 
 class AIDiscordBot(commands.Bot):
     """Main bot that inherits from commands.Bot"""
 
-    def __init__(self):
+    def __init__(self, ai_client: AIProvider, db_manager: DatabaseProvider):
         """Initialize Discord bot"""
 
         # Privileged Discord intents
@@ -17,12 +18,15 @@ class AIDiscordBot(commands.Bot):
         intents.members = True
         intents.presences = True
 
-        # Allow access to AI
-        self.intent_manager = get_intent_manager()
-        self.ai_client = get_ai_client()
+        self.ai_client = ai_client
+        self.db_manager = db_manager
 
         # Set command prefix
         super().__init__(command_prefix="!", intents=intents, help_command=None)
+
+    async def setup_hook(self):
+        self.intent_manager = IntentManager()
+        await self.load_extension("bot.commands")
 
     async def on_ready(self):
         """When bot successfully connects to Discord"""
@@ -38,26 +42,36 @@ class AIDiscordBot(commands.Bot):
 
         # Check if message intents toward AmjkoAI
         if await self.intent_manager.is_intent_ai(message.content):
-            response = await self.ai_client.message(message.content)
+
+            # context = await self.ai_client.fetch_context()
+            context = [{"role": ""}]  # For testing
+
+            # Get response and handle error if something went wrong with API
+            response = await self.ai_client.fetch_response(message.content, context)
             if response is None:
                 response = "Someone tell Amjko there's a problem with my AI"
+
+            # Send response to discord
             await message.channel.send(f"{response}")
+        else:
+            response = None
+
+        # Save the conversation pair
+        await self.db_manager.save_message_pair(
+            user_id=str(message.author.id),
+            channel_id=str(message.channel.id),
+            user_message=message.content,
+            assistant_reply=response,
+            # TODO: Detect topic with AI
+            topic="chat",
+            # TODO: Detect tags with AI
+            tags=["discord", "casual"],
+        )
 
         # Allow to continue handling other messages sent in server
         await self.process_commands(message)
 
-    async def setup_hook(self):
-        """Load extension of commands"""
-
-        await self.load_extension("bot.commands")
-
-    async def cleanup(self):
-        """Other executions to do before closing"""
-
-        print(f"\nBot shutting down...")
-
     async def close(self):
-        """Closes Discord bot altogether"""
+        """Cleans then closes the connection to Discord"""
 
-        await self.cleanup()
         await super().close()

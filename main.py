@@ -1,58 +1,75 @@
-from ai.intent_manager import init as init_intent_manager
-from ai.openai_client import init as init_ai
-from bot.client import AIDiscordBot
-from config.settings import DISCORD_TOKEN, OPENAI_API_KEY
-from utils.logger import HANDLER, HANDLER_LEVEL
+import asyncio
+
+from ai.client_factory import AIClientFactory
+from bot.dc_client import AIDiscordBot
+from config.settings import DATA_SOURCE_NAME, DISCORD_TOKEN, OPENAI_API_KEY
+from database.database_factory import DatabaseFactory
+from utils.logger import Logger
 
 
 class AmjkoAI:
     def __init__(self):
-        """Initialize AmjkoAI"""
+        """Initialize AmjkoAI components"""
 
-        # Initialize AI client
-        init_ai(OPENAI_API_KEY)
+        self.logger = Logger()
+        self.logger.run()
 
-        # Intialize AI intent manager
-        init_intent_manager()
+        # Create factories
+        self.db_factory = DatabaseFactory()
+        self.ai_factory = AIClientFactory()
 
-        # Initialize Discord bot
-        self.bot = AIDiscordBot()
+    def start(self):
+        """Start entire AI bot"""
 
-        # Initialize database manager
+        async def run_bot():
+            try:
+                await self.setup()
+                await self.bot.start(DISCORD_TOKEN)
+            finally:
+                await self.close()
 
-        # Initialize message handler
-
-        # Initialize consent manager
+        try:
+            asyncio.run(run_bot())
+        except KeyboardInterrupt:
+            pass
+        except Exception as err:
+            print(f"\nBot crashes: {err}")
 
     async def setup(self):
-        """Setup minor features and parts of the AI and Bot"""
+        """Async setup method for all components"""
 
-        # Create database tables
+        # Initialize and connect to database manager
+        self.db_factory.init_postgresql(DATA_SOURCE_NAME)
+        self.db_manager = await self.db_factory.get_db_manager()
 
-        # Test OpenAI connection
+        # Initialize AI client
+        self.ai_factory.init_openai(OPENAI_API_KEY, self.db_manager)
+        self.ai_client = await self.ai_factory.get_client()
 
-        # Set up Discord event handlers
-
-        # Set up Discord commands
-        await self.bot.setup_hook()
+        # Initialize bot with dependencies
+        self.bot = AIDiscordBot(ai_client=self.ai_client, db_manager=self.db_manager)
 
     async def cleanup(self):
         """Cleanup handler before closing"""
 
-        pass
+        print(f"\nBot shutting down...")
+
+        # Safely close running components
+        if self.ai_client:
+            await self.ai_client.close()
+        if self.db_manager:
+            await self.db_manager.close()
 
     async def close(self):
         """Close program altogether"""
 
-        # Cleanup for other files aside from bot
         await self.cleanup()
-        # Execute cleanup for the Discord bot
         await self.bot.close()
 
 
 def main():
-    ai = AmjkoAI()
-    ai.bot.run(token=DISCORD_TOKEN, log_handler=HANDLER, log_level=HANDLER_LEVEL)
+    amjko_ai = AmjkoAI()
+    amjko_ai.start()
 
 
 if __name__ == "__main__":

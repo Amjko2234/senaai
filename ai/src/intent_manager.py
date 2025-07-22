@@ -1,7 +1,9 @@
-# from ai.openai_client import client as ai_client
+from typing import Optional
 
 
 class IntentManager:
+    _instance: Optional["IntentManager"] = None
+
     def __init__(self):
         self.ai_names = [
             "openai",
@@ -12,27 +14,14 @@ class IntentManager:
             "amjko ai",
             "ai",
         ]
-        pass
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
     async def is_intent_ai(self, message: str) -> bool:
         for name in self.ai_names:
             if name.lower() in message.lower().strip():
                 return True
         return False
-
-
-_intent_manager: IntentManager | None = None
-
-
-def init() -> None:
-    global _intent_manager
-    if _intent_manager is None:
-        _intent_manager = IntentManager()
-
-    return
-
-
-def get_manager() -> IntentManager:
-    if _intent_manager is None:
-        raise RuntimeError("AI Intent Manager not initialized")
-    return _intent_manager
