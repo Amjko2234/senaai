@@ -42,8 +42,11 @@ class PostgreSQLManager:
         topic: str = "unspecified",  # Part of data
         tags: Optional[List[str]] = None,  # Part of data
         metadata: Optional[Dict] = None,  # Part of data
-        embedding: Optional[List[float]] = None,
+        embedding: str = "",
     ) -> Any:
+        if not self.is_connected:
+            await self.connect()
+
         try:
             payload = {
                 "messages": [
@@ -71,8 +74,6 @@ class PostgreSQLManager:
                 )
                 payload["message_count"] = 2
 
-            embedding_str = self._embedding_str_converter(embedding)
-
             async with self.pool.acquire() as connection:
                 result = await connection.fetchval(
                     """
@@ -83,7 +84,7 @@ class PostgreSQLManager:
                     user_id,
                     channel_id,
                     json.dumps(payload),
-                    embedding_str,
+                    embedding,
                 )
 
             return result
@@ -100,6 +101,9 @@ class PostgreSQLManager:
         until: Optional[datetime] = None,
         limit: Optional[datetime] = None,
     ) -> List[Dict[str, Any]]:
+        if not self.is_connected:
+            await self.connect()
+
         query_parts: List[str] = [
             "SELECT data->'messages' AS messages",
             "FROM conversations",
@@ -137,9 +141,3 @@ class PostgreSQLManager:
     async def close(self) -> None:
         if self.pool:
             await self.pool.close()
-
-    @staticmethod
-    def _embedding_str_converter(embedding: Optional[List[float]] = None) -> str:
-        if embedding is None:
-            embedding = [float(0)]
-        return f"[{','.join(map(str, embedding))}]"

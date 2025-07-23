@@ -1,6 +1,9 @@
 from typing import Literal, Optional
 
+from ai.interface.embedding_provider import EmbeddingProvider
+from database.interface.ctx_retriever_provider import ContextRetrieverProvider
 from database.interface.database_provider import DatabaseProvider
+from database.src.context_manager import ContextManager
 from database.src.postgresql_manager import PostgreSQLManager
 
 
@@ -15,6 +18,7 @@ class DatabaseFactory:
 
     _instance: Optional["DatabaseFactory"] = None
     _db_provider: Optional[DatabaseProvider] = None
+    _ctx_provider: Optional[ContextRetrieverProvider] = None
 
     # Singleton pattern: one global instance
     def __new__(cls):
@@ -27,6 +31,11 @@ class DatabaseFactory:
 
         self._db_provider = PostgreSQLManager(dsn)
 
+    def init_ctx_retriever(self) -> None:
+        """Initialize context retriever for AI prompts"""
+
+        self._ctx_provider = ContextManager()
+
     async def get_db_manager(self) -> DatabaseProvider:
         """Get the current database provider"""
 
@@ -37,6 +46,21 @@ class DatabaseFactory:
             await self._db_provider.connect()
 
         return self._db_provider
+
+    async def get_ctx_retriever(
+        self,
+        db_manager: Optional[DatabaseProvider] = None,
+        embedding: Optional[EmbeddingProvider] = None,
+    ) -> ContextRetrieverProvider:
+        """Get the current context retriever for ai"""
+
+        if self._ctx_provider is None:
+            raise RuntimeError("Context retriever not initialized")
+
+        if not self._ctx_provider.is_initialized:
+            await self._ctx_provider.initialize(db_manager, embedding)
+
+        return self._ctx_provider
 
     async def close(self):
         """Clean up database resources"""

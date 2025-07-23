@@ -4,85 +4,71 @@ from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
 from ai.interface.ai_provider import AIProvider
-from database.database_factory import DatabaseFactory
+from ai.interface.embedding_provider import EmbeddingProvider
 from database.interface.database_provider import DatabaseProvider
 
 
 class OpenAIClient:
     """Concrete implementation of AIProvider using OpenAI"""
 
-    def __init__(self, api_key: str):
-        self.client = AsyncOpenAI(api_key=api_key)
-        self.model = "gpt-4.1-mini"
-        self.embedding_model = "text-embedding-3-small"
-        self.db_manager: Optional[DatabaseProvider] = None
+    def __init__(self, api_key: str, db_manager: Optional[DatabaseProvider] = None):
+        self._client = AsyncOpenAI(api_key=api_key)
+        self._model = "gpt-4.1-mini"
+        self._embedding_model = "text-embedding-3-small"
+
+        self.db_manager = db_manager
+
         self._initialized = False
+
+    @property
+    def client(self) -> AsyncOpenAI:
+        return self._client
+
+    @property
+    def model(self) -> str:
+        return self._model
+
+    @property
+    def embedding_model(self) -> str:
+        return self._embedding_model
 
     @property
     def is_initialized(self) -> bool:
         return self._initialized
 
-    async def initialize(self) -> None:
-        db_factory = DatabaseFactory()
-        self.db_manager = await db_factory.get_db_manager()
+    async def initialize(self, db_manager: Optional[DatabaseProvider] = None) -> None:
+        self.db_manager = db_manager
+
+        if self.db_manager is None:
+            raise ValueError("DatabaseProvider must be provided")
+
         self._initialized = True
 
-    async def fetch_response(
-        self, prompt: str, context: List[Dict[str, str]]
-    ) -> Optional[str]:
-        if not self._initialized:
+    async def fetch_response(self, prompt: str, context: str = "") -> Optional[str]:
+        if not self.is_initialized:
             await self.initialize()
 
+        system_prompt = """
+            You are AmjkoAI, an AI assistant in a Discord server.
+            Don't be too friendly, be like the usual friend.
+        """
+
+        if context:
+            system_prompt += f"\n\n{context}"
+
         full_message = [
-            {
-                "role": "system",
-                "content": """
-                    You are AmjkoAI, an AI assistant in a Discord server.
-                """,
-            }
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
         ]
-        # full_message.extend(context)
-        full_message.append({"role": "user", "content": prompt})
 
         response = await self.client.chat.completions.create(
             model=self.model,
             max_tokens=100,
             messages=cast(List[ChatCompletionMessageParam], full_message),
+            store=True,
         )
 
         return response.choices[0].message.content
-
-    async def generate_embedding(self, text: str) -> List[float]:
-        if not self._initialized:
-            await self.initialize()
-
-        response = await self.client.embeddings.create(
-            model=self.embedding_model, input=text
-        )
-
-        return response.data[0].embedding
-
-    async def fetch_context(self, user_id: str, text: str, limit: int = 5):
-        if not self._initialized:
-            await self.initialize()
-
-        current_embedding = await self.generate_embedding(text)
-        async with self.db_manager.get_pool.acquire() as connection:
-            similar_text = await connection.fetch(
-                """
-                SELECT data, (embedding <=> $1) as distance
-                  FROM conversations
-                 WHERE user_id = $2
-                 ORDER BY distance 
-                       ASC
-                 LIMIT $3
-                """,
-                current_embedding,
-                user_id,
-                limit,
-            )
-
-        return similar_text
 
     async def close(self):
         if self.client:

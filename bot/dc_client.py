@@ -2,14 +2,22 @@ import discord
 from discord.ext import commands
 
 from ai.interface.ai_provider import AIProvider
+from ai.interface.embedding_provider import EmbeddingProvider
 from ai.src.intent_manager import IntentManager
+from database.interface.ctx_retriever_provider import ContextRetrieverProvider
 from database.interface.database_provider import DatabaseProvider
 
 
 class AIDiscordBot(commands.Bot):
     """Main bot that inherits from commands.Bot"""
 
-    def __init__(self, ai_client: AIProvider, db_manager: DatabaseProvider):
+    def __init__(
+        self,
+        ai_client: AIProvider,
+        db_manager: DatabaseProvider,
+        embedding: EmbeddingProvider,
+        context_retriever: ContextRetrieverProvider,
+    ):
         """Initialize Discord bot"""
 
         # Privileged Discord intents
@@ -20,6 +28,8 @@ class AIDiscordBot(commands.Bot):
 
         self.ai_client = ai_client
         self.db_manager = db_manager
+        self.embedding = embedding
+        self.context_retriever = context_retriever
 
         # Set command prefix
         super().__init__(command_prefix="!", intents=intents, help_command=None)
@@ -41,7 +51,6 @@ class AIDiscordBot(commands.Bot):
             return
 
         # Check if message intents toward AmjkoAI
-        # if await self.intent_manager.is_intent_ai(message.content):
         if any(
             (
                 # If mentioned the AI bot
@@ -51,15 +60,24 @@ class AIDiscordBot(commands.Bot):
             )
         ):
             # TODO:
-            # context = await self.ai_client.fetch_context()
+            context = await self.context_retriever.get_conversation_context(
+                user_id=str(message.author.id),
+                current_message=message.content,
+                channel_id=str(message.channel.id),
+            )
+
+            formatted_context = self.context_retriever.format_context_for_ai(
+                current_message=message.content, context=context
+            )
 
             # Not yet implemented below
-            context = [{"role": ""}]
             topic = ""
             tags = [""]
 
             # Get response and handle error if something went wrong with API
-            response = await self.ai_client.fetch_response(message.content, context)
+            response = await self.ai_client.fetch_response(
+                message.content, formatted_context
+            )
             if response is None:
                 response = "Someone tell Amjko there's a problem with my AI"
 
@@ -71,7 +89,9 @@ class AIDiscordBot(commands.Bot):
         # Update that active conversation
         self.intent_manager.update_activity(message.author.id)
 
-        embedding = await self.ai_client.generate_embedding(message.content)
+        # Generate embedding vector
+        embedding = await self.embedding.generate(message.content, False)
+        assert isinstance(embedding, str), "Embedding is raw"
 
         # Save the conversation pair
         await self.db_manager.save_message_pair(

@@ -31,7 +31,7 @@ class DatabaseProvider(Protocol):
         topic: str = "unspecified",
         tags: Optional[List[str]] = None,
         metadata: Optional[Dict] = None,
-        embedding: Optional[List[float]] = None,
+        embedding: str = "",
     ) -> Any:
         """Save a conversation message pair"""
         ...
@@ -48,9 +48,4 @@ class DatabaseProvider(Protocol):
 
     async def close(self) -> None:
         """Clean up database resources"""
-        ...
-
-    @staticmethod
-    def _embedding_str_converter(embedding: Optional[List[float]] = None) -> str:
-        """Converts embedding list to string format"""
         ...

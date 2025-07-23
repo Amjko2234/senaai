@@ -1,9 +1,9 @@
 import asyncio
 
-from ai.client_factory import AIClientFactory
+from ai.factory import AIClientFactory
 from bot.dc_client import AIDiscordBot
 from config.settings import DATA_SOURCE_NAME, DISCORD_TOKEN, OPENAI_API_KEY
-from database.database_factory import DatabaseFactory
+from database.factory import DatabaseFactory
 from utils.logger import Logger
 
 
@@ -17,11 +17,6 @@ class AmjkoAI:
         # Create factories
         self.db_factory = DatabaseFactory()
         self.ai_factory = AIClientFactory()
-
-        #
-        self.ai_client = None
-        self.db_manager = None
-        self.bot = None
 
     def start(self):
         """Start entire AI bot"""
@@ -43,16 +38,34 @@ class AmjkoAI:
     async def setup(self):
         """Async setup method for all components"""
 
-        # Initialize and connect to database manager
-        self.db_factory.init_postgresql(DATA_SOURCE_NAME)
-        self.db_manager = await self.db_factory.get_db_manager()
+        try:
+            # Initialize and connect to database manager
+            self.db_factory.init_postgresql(DATA_SOURCE_NAME)
+            self.db_manager = await self.db_factory.get_db_manager()
 
-        # Initialize AI client
-        self.ai_factory.init_openai(OPENAI_API_KEY)
-        self.ai_client = await self.ai_factory.get_client()
+            # Initialize AI client
+            self.ai_factory.init_openai(OPENAI_API_KEY)
+            self.ai_client = await self.ai_factory.get_client(self.db_manager)
 
-        # Initialize bot with dependencies
-        self.bot = AIDiscordBot(ai_client=self.ai_client, db_manager=self.db_manager)
+            # Initalize AI embedding generator
+            self.ai_factory.init_embedding()
+            self.ai_embedding = await self.ai_factory.get_embedding(self.ai_client)
+
+            # Initialize context retriever for AI
+            self.db_factory.init_ctx_retriever()
+            self.context_retriever = await self.db_factory.get_ctx_retriever(
+                self.db_manager, self.ai_embedding
+            )
+
+            # Initialize bot with dependencies
+            self.bot = AIDiscordBot(
+                ai_client=self.ai_client,
+                db_manager=self.db_manager,
+                embedding=self.ai_embedding,
+                context_retriever=self.context_retriever,
+            )
+        except RuntimeError as err:
+            print(f"Error: {err}")
 
     async def cleanup(self):
         """Cleanup handler before closing"""
