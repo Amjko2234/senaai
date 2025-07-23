@@ -18,6 +18,11 @@ class AmjkoAI:
         self.db_factory = DatabaseFactory()
         self.ai_factory = AIClientFactory()
 
+        #
+        self.ai_client = None
+        self.db_manager = None
+        self.bot = None
+
     def start(self):
         """Start entire AI bot"""
 
@@ -43,7 +48,7 @@ class AmjkoAI:
         self.db_manager = await self.db_factory.get_db_manager()
 
         # Initialize AI client
-        self.ai_factory.init_openai(OPENAI_API_KEY, self.db_manager)
+        self.ai_factory.init_openai(OPENAI_API_KEY)
         self.ai_client = await self.ai_factory.get_client()
 
         # Initialize bot with dependencies
@@ -55,16 +60,17 @@ class AmjkoAI:
         print(f"\nBot shutting down...")
 
         # Safely close running components
-        if self.ai_client:
+        if hasattr(self, "ai_client") and self.ai_client:
             await self.ai_client.close()
-        if self.db_manager:
+        if hasattr(self, "db_manager") and self.db_manager:
             await self.db_manager.close()
 
     async def close(self):
         """Close program altogether"""
 
         await self.cleanup()
-        await self.bot.close()
+        if hasattr(self, "bot") and self.bot:
+            await self.bot.close()
 
 
 def main():

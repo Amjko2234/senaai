@@ -3,7 +3,6 @@ from typing import Optional
 from ai.interface.ai_provider import AIProvider
 from ai.src.openai_client import OpenAIClient
 from database.interface.database_provider import DatabaseProvider
-from database.src.postgresql_manager import PostgreSQLManager
 
 
 class AIClientFactory:
@@ -17,11 +16,10 @@ class AIClientFactory:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def init_openai(self, api_key: str, db_manager: Optional[DatabaseProvider]) -> None:
+    def init_openai(self, api_key: str):
         """Initialize with OpenAI provider"""
 
-        self._db_provider = db_manager
-        self._ai_client = OpenAIClient(api_key, self._db_provider)
+        self._ai_client = OpenAIClient(api_key)
 
     async def get_client(self) -> AIProvider:
         """Get the current AI client"""

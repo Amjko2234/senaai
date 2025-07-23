@@ -41,10 +41,22 @@ class AIDiscordBot(commands.Bot):
             return
 
         # Check if message intents toward AmjkoAI
-        if await self.intent_manager.is_intent_ai(message.content):
-
+        # if await self.intent_manager.is_intent_ai(message.content):
+        if any(
+            (
+                # If mentioned the AI bot
+                await self.intent_manager.is_intent_ai(message.content),
+                # If in active conversation - lasts for 15 minutes of no activity
+                self.intent_manager.is_in_converstaion(message.author.id),
+            )
+        ):
+            # TODO:
             # context = await self.ai_client.fetch_context()
-            context = [{"role": ""}]  # For testing
+
+            # Not yet implemented below
+            context = [{"role": ""}]
+            topic = ""
+            tags = [""]
 
             # Get response and handle error if something went wrong with API
             response = await self.ai_client.fetch_response(message.content, context)
@@ -56,16 +68,20 @@ class AIDiscordBot(commands.Bot):
         else:
             response = None
 
+        # Update that active conversation
+        self.intent_manager.update_activity(message.author.id)
+
+        embedding = await self.ai_client.generate_embedding(message.content)
+
         # Save the conversation pair
         await self.db_manager.save_message_pair(
             user_id=str(message.author.id),
             channel_id=str(message.channel.id),
             user_message=message.content,
             assistant_reply=response,
-            # TODO: Detect topic with AI
-            topic="chat",
-            # TODO: Detect tags with AI
-            tags=["discord", "casual"],
+            topic=topic,
+            tags=tags,
+            embedding=embedding,
         )
 
         # Allow to continue handling other messages sent in server

@@ -2,6 +2,8 @@ from abc import abstractmethod
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Protocol
 
+import asyncpg
+
 
 class DatabaseProvider(Protocol):
     """Protocol defining the contract for database operations"""
@@ -9,6 +11,11 @@ class DatabaseProvider(Protocol):
     @property
     def is_connected(self) -> bool:
         """Check if database is connected"""
+        ...
+
+    @property
+    def get_pool(self) -> Optional[asyncpg.Pool]:
+        """Provide pool access to database"""
         ...
 
     async def connect(self) -> None:
@@ -24,6 +31,7 @@ class DatabaseProvider(Protocol):
         topic: str = "unspecified",
         tags: Optional[List[str]] = None,
         metadata: Optional[Dict] = None,
+        embedding: Optional[List[float]] = None,
     ) -> Any:
         """Save a conversation message pair"""
         ...
@@ -40,4 +48,9 @@ class DatabaseProvider(Protocol):
 
     async def close(self) -> None:
         """Clean up database resources"""
+        ...
+
+    @staticmethod
+    def _embedding_str_converter(embedding: Optional[List[float]] = None) -> str:
+        """Converts embedding list to string format"""
         ...

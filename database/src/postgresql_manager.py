@@ -25,6 +25,10 @@ class PostgreSQLManager:
         except AttributeError:
             return False
 
+    @property
+    def get_pool(self) -> Optional[asyncpg.Pool]:
+        return self.pool
+
     async def connect(self) -> None:
         if self.pool is None:
             self.pool = await asyncpg.create_pool(dsn=self.dsn)
@@ -33,11 +37,12 @@ class PostgreSQLManager:
         self,
         user_id: str,
         channel_id: str,
-        user_message: str,
-        assistant_reply: Optional[str],
-        topic: str = "unspecified",
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict] = None,
+        user_message: str,  # Part of data
+        assistant_reply: Optional[str],  # Part of data
+        topic: str = "unspecified",  # Part of data
+        tags: Optional[List[str]] = None,  # Part of data
+        metadata: Optional[Dict] = None,  # Part of data
+        embedding: Optional[List[float]] = None,
     ) -> Any:
         try:
             payload = {
@@ -66,16 +71,19 @@ class PostgreSQLManager:
                 )
                 payload["message_count"] = 2
 
+            embedding_str = self._embedding_str_converter(embedding)
+
             async with self.pool.acquire() as connection:
                 result = await connection.fetchval(
                     """
-                    INSERT INTO conversations (user_id, channel_id, data, created_at)
-                    VALUES ($1, $2, $3, NOW())
+                    INSERT INTO conversations (user_id, channel_id, data, created_at, embedding)
+                    VALUES ($1, $2, $3, NOW(), $4)
                     RETURNING id
                 """,
                     user_id,
                     channel_id,
                     json.dumps(payload),
+                    embedding_str,
                 )
 
             return result
@@ -92,7 +100,7 @@ class PostgreSQLManager:
         until: Optional[datetime] = None,
         limit: Optional[datetime] = None,
     ) -> List[Dict[str, Any]]:
-        query_parts: list[str] = [
+        query_parts: List[str] = [
             "SELECT data->'messages' AS messages",
             "FROM conversations",
             "WHERE user_id = $1",
@@ -129,3 +137,9 @@ class PostgreSQLManager:
     async def close(self) -> None:
         if self.pool:
             await self.pool.close()
+
+    @staticmethod
+    def _embedding_str_converter(embedding: Optional[List[float]] = None) -> str:
+        if embedding is None:
+            embedding = [float(0)]
+        return f"[{','.join(map(str, embedding))}]"
