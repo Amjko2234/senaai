@@ -7,9 +7,9 @@ from database.factory import DatabaseFactory
 from utils.logger import Logger
 
 
-class AmjkoAI:
+class Sena:
     def __init__(self):
-        """Initialize AmjkoAI components"""
+        """Initialize Sena's components"""
 
         self.logger = Logger()
         self.logger.run()
@@ -45,7 +45,7 @@ class AmjkoAI:
 
             # Initialize AI client
             self.ai_factory.init_openai(OPENAI_API_KEY)
-            self.ai_client = await self.ai_factory.get_client(self.db_manager)
+            self.ai_client = await self.ai_factory.get_client()
 
             # Initalize AI embedding generator
             self.ai_factory.init_embedding()
@@ -87,8 +87,8 @@ class AmjkoAI:
 
 
 def main():
-    amjko_ai = AmjkoAI()
-    amjko_ai.start()
+    sena_ai = Sena()
+    sena_ai.start()
 
 
 if __name__ == "__main__":

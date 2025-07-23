@@ -4,19 +4,15 @@ from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
 from ai.interface.ai_provider import AIProvider
-from ai.interface.embedding_provider import EmbeddingProvider
-from database.interface.database_provider import DatabaseProvider
 
 
 class OpenAIClient:
     """Concrete implementation of AIProvider using OpenAI"""
 
-    def __init__(self, api_key: str, db_manager: Optional[DatabaseProvider] = None):
+    def __init__(self, api_key: str):
         self._client = AsyncOpenAI(api_key=api_key)
         self._model = "gpt-4.1-mini"
         self._embedding_model = "text-embedding-3-small"
-
-        self.db_manager = db_manager
 
         self._initialized = False
 
@@ -36,12 +32,7 @@ class OpenAIClient:
     def is_initialized(self) -> bool:
         return self._initialized
 
-    async def initialize(self, db_manager: Optional[DatabaseProvider] = None) -> None:
-        self.db_manager = db_manager
-
-        if self.db_manager is None:
-            raise ValueError("DatabaseProvider must be provided")
-
+    async def initialize(self) -> None:
         self._initialized = True
 
     async def fetch_response(self, prompt: str, context: str = "") -> Optional[str]:
@@ -49,7 +40,7 @@ class OpenAIClient:
             await self.initialize()
 
         system_prompt = """
-            You are AmjkoAI, an AI assistant in a Discord server.
+            You are Sena, an AI assistant in a Discord server.
             Don't be too friendly, be like the usual friend.
         """
 

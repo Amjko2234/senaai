@@ -30,16 +30,14 @@ class AIClientFactory:
         # if self._ai_client.is_initialized:
         self._embedding_generator = OpenAIEmbedding()
 
-    async def get_client(
-        self, db_manager: Optional[DatabaseProvider] = None
-    ) -> AIProvider:
+    async def get_client(self) -> AIProvider:
         """Get the current AI client"""
 
         if self._ai_client is None:
             raise RuntimeError("AI Client not initialized")
 
         if not self._ai_client.is_initialized:
-            await self._ai_client.initialize(db_manager)
+            await self._ai_client.initialize()
 
         return self._ai_client
 

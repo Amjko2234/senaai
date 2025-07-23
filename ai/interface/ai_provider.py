@@ -29,7 +29,7 @@ class AIProvider(Protocol):
         """Check if provider is initialized"""
         ...
 
-    async def initialize(self, db_manager: Optional[DatabaseProvider] = None) -> None:
+    async def initialize(self) -> None:
         """Initialize the AI provider"""
         ...
 
