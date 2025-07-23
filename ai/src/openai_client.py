@@ -63,7 +63,7 @@ class OpenAIClient:
 
         response = await self.client.chat.completions.create(
             model=self.model,
-            max_tokens=100,
+            max_tokens=500,
             messages=cast(List[ChatCompletionMessageParam], full_message),
             store=True,
         )
