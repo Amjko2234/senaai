@@ -6,9 +6,8 @@ from typing import Any, Dict, List, Optional
 import asyncpg
 import numpy as npy
 
-from ai.interface.embedding_provider import EmbeddingProvider
-from database.interface.ctx_retriever_provider import ContextRetrieverProvider
-from database.interface.database_provider import DatabaseProvider
+from ...ai.interface import EmbeddingProvider
+from ..interface import CtxRetrieverProvider, DatabaseProvider
 
 
 class ContextManager:

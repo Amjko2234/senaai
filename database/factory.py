@@ -1,10 +1,8 @@
 from typing import Literal, Optional
 
-from ai.interface.embedding_provider import EmbeddingProvider
-from database.interface.ctx_retriever_provider import ContextRetrieverProvider
-from database.interface.database_provider import DatabaseProvider
-from database.src.context_manager import ContextManager
-from database.src.postgresql_manager import PostgreSQLManager
+from ..ai.interface import EmbeddingProvider
+from .interface import CtxRetrieverProvider, DatabaseProvider
+from .src import ContextManager, DatabaseManager
 
 
 class DatabaseError(Exception):
@@ -18,7 +16,7 @@ class DatabaseFactory:
 
     _instance: Optional["DatabaseFactory"] = None
     _db_provider: Optional[DatabaseProvider] = None
-    _ctx_provider: Optional[ContextRetrieverProvider] = None
+    _ctx_provider: Optional[CtxRetrieverProvider] = None
 
     # Singleton pattern: one global instance
     def __new__(cls):
@@ -29,7 +27,7 @@ class DatabaseFactory:
     def init_postgresql(self, dsn: str) -> None:
         """Initialize with PostgreSQL provider"""
 
-        self._db_provider = PostgreSQLManager(dsn)
+        self._db_provider = DatabaseManager(dsn)
 
     def init_ctx_retriever(self) -> None:
         """Initialize context retriever for AI prompts"""
@@ -51,7 +49,7 @@ class DatabaseFactory:
         self,
         db_manager: Optional[DatabaseProvider] = None,
         embedding: Optional[EmbeddingProvider] = None,
-    ) -> ContextRetrieverProvider:
+    ) -> CtxRetrieverProvider:
         """Get the current context retriever for ai"""
 
         if self._ctx_provider is None:

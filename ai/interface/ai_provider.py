@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Protocol
 
 from openai import AsyncOpenAI
 
-from database.interface.database_provider import DatabaseProvider
+from ...database.interface import DatabaseProvider
 
 
 class AIProvider(Protocol):

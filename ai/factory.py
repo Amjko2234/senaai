@@ -1,10 +1,8 @@
 from typing import Optional
 
-from ai.interface.ai_provider import AIProvider
-from ai.interface.embedding_provider import EmbeddingProvider
-from ai.src.openai_client import OpenAIClient
-from ai.src.openai_embedding import OpenAIEmbedding
-from database.interface.database_provider import DatabaseProvider
+from ..database.interface import DatabaseProvider
+from .interface import AIProvider, EmbeddingProvider
+from .src import OpenAIClient, OpenAIEmbedding
 
 
 class AIClientFactory:

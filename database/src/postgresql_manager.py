@@ -5,7 +5,7 @@ from uuid import uuid4
 
 import asyncpg
 
-from database.interface.database_provider import DatabaseProvider
+from ..interface import DatabaseProvider
 
 
 class PostgreSQLManager:
@@ -44,6 +44,7 @@ class PostgreSQLManager:
         metadata: Optional[Dict] = None,  # Part of data
         embedding: str = "",
     ) -> Any:
+        # TODO:
         if not self.is_connected:
             await self.connect()
 

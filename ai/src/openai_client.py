@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, cast
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
-from ai.interface.ai_provider import AIProvider
+from ..interface import AIProvider
 
 
 class OpenAIClient:
@@ -12,6 +12,7 @@ class OpenAIClient:
     def __init__(self, api_key: str):
         self._client = AsyncOpenAI(api_key=api_key)
         self._model = "gpt-4.1-mini"
+        self._summary_model = "gpt-4.1-nano"
         self._embedding_model = "text-embedding-3-small"
 
         self._initialized = False

@@ -1,11 +1,9 @@
 import discord
 from discord.ext import commands
 
-from ai.interface.ai_provider import AIProvider
-from ai.interface.embedding_provider import EmbeddingProvider
-from ai.src.intent_manager import IntentManager
-from database.interface.ctx_retriever_provider import ContextRetrieverProvider
-from database.interface.database_provider import DatabaseProvider
+from ..ai.interface import AIProvider, EmbeddingProvider
+from ..ai.src import IntentManager
+from ..database.interface import CtxRetrieverProvider, DatabaseProvider
 
 
 class AIDiscordBot(commands.Bot):
@@ -16,7 +14,7 @@ class AIDiscordBot(commands.Bot):
         ai_client: AIProvider,
         db_manager: DatabaseProvider,
         embedding: EmbeddingProvider,
-        context_retriever: ContextRetrieverProvider,
+        context_retriever: CtxRetrieverProvider,
     ):
         """Initialize Discord bot"""
 
@@ -50,7 +48,7 @@ class AIDiscordBot(commands.Bot):
         if message.author.bot:
             return
 
-        # Check if message intents toward AmjkoAI
+        # Check if message intents toward SenaAI
         if any(
             (
                 # If mentioned the AI bot

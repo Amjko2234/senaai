@@ -12,9 +12,11 @@ class IntentManager:
             "openai",
             "open_ai",
             "open ai",
-            "amjkoai",
-            "amjko_ai",
-            "amjko ai",
+            "sena",
+            "senai",
+            "senaai",
+            "sena_ai",
+            "sena ai",
             "ai",
         ]
 

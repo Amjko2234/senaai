@@ -1,7 +1,6 @@
 from typing import List, Optional
 
-from ai.interface.ai_provider import AIProvider
-from ai.interface.embedding_provider import EmbeddingProvider
+from ..interface import AIProvider, EmbeddingProvider
 
 
 class OpenAIEmbedding:

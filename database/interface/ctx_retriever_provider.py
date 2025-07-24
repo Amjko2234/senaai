@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from typing import Any, Dict, List, Optional, Protocol, Tuple
 
-from ai.interface.embedding_provider import EmbeddingProvider
-from database.interface.database_provider import DatabaseProvider
+from ...ai.interface import EmbeddingProvider
+from ..interface import DatabaseProvider
 
 
 class ContextRetrieverProvider(Protocol):

@@ -1,6 +1,6 @@
 from typing import List, Optional, Protocol
 
-from ai.interface.ai_provider import AIProvider
+from .ai_provider import AIProvider
 
 
 class EmbeddingProvider(Protocol):

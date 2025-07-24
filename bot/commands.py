@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from ai.interface.ai_provider import AIProvider
+from ..ai.interface import AIProvider
 
 
 class Commands(commands.Cog):

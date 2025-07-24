@@ -1,10 +1,10 @@
 import asyncio
 
-from ai.factory import AIClientFactory
-from bot.dc_client import AIDiscordBot
-from config.settings import DATA_SOURCE_NAME, DISCORD_TOKEN, OPENAI_API_KEY
-from database.factory import DatabaseFactory
-from utils.logger import Logger
+from .ai import AIClientFactory
+from .bot import AIDiscordBot
+from .config import AI_API, DC_TOKEN, DSN
+from .database import DatabaseFactory
+from .utils import Logger
 
 
 class Sena:
@@ -24,7 +24,7 @@ class Sena:
         async def run_bot():
             try:
                 await self.setup()
-                await self.bot.start(DISCORD_TOKEN)
+                await self.bot.start(DC_TOKEN)
             finally:
                 await self.close()
 
@@ -40,11 +40,11 @@ class Sena:
 
         try:
             # Initialize and connect to database manager
-            self.db_factory.init_postgresql(DATA_SOURCE_NAME)
+            self.db_factory.init_postgresql(DSN)
             self.db_manager = await self.db_factory.get_db_manager()
 
             # Initialize AI client
-            self.ai_factory.init_openai(OPENAI_API_KEY)
+            self.ai_factory.init_openai(AI_API)
             self.ai_client = await self.ai_factory.get_client()
 
             # Initalize AI embedding generator
