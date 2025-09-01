@@ -1,0 +1,3 @@
+class EnvVariableError:
+    # TODO:
+    pass

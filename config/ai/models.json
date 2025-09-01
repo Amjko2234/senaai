@@ -1,0 +1,13 @@
+{
+  "word_length_min": 1,
+  "word_length_max": -1,
+
+  "list_item_min": 1,
+  "list_item_max": -1,
+
+  "message_length_min": 1,
+  "message_length_max": -1,
+
+  "minute_duration_min": 0,
+  "minute_duration_max": -1
+}

@@ -1,0 +1,164 @@
+# Layers (3):
+#   APP, COR, DOM, INF, SYS
+# Services (2-4)
+# Categories (2-4):
+#   AUTH, CFG, IO, LOOK, SYS, UNK
+# Value (1-999)
+
+- code: SYS-UNK-UNK-100
+  layer: SYS
+  service: UNK
+  category: UNK
+  value: 100
+  description: Base for system error - Dont use
+
+  # System general sub errors
+
+  # System specific errors
+
+# -----------------------------------------------------------------------------
+#   System error codes
+# -----------------------------------------------------------------------------
+- code: APP-UNK-UNK-200
+  layer: APP
+  service: UNK
+  category: UNK
+  value: 200
+  description: Base application error - Dont use
+
+  # Application sub errors
+
+  # Application specific errors
+
+# -----------------------------------------------------------------------------
+#   Core error codes
+# -----------------------------------------------------------------------------
+- code: COR-UNK-UNK-300
+  layer: COR
+  service: UNK
+  category: UNK
+  value: 300
+  description: Base core error - Dont use
+  # Core general sub errors
+- code: COR-UNK-IO-301
+  layer: COR
+  service: UNK
+  category: IO
+  value: 301
+  description: FileNotFoundError - file to access is not found
+- code: COR-UNK-IO-302
+  layer: COR
+  service: UNK
+  category: IO
+  value: 302
+  description: FileNotFoundWarning - file is not found, but recoverable
+- code: COR-UNK-IO-303
+  layer: COR
+  service: UNK
+  category: IO
+  value: 303
+  description: PathNotFoundError - path to access is not found
+- code: COR-UNK-IO-304
+  layer: COR
+  service: UNK
+  category: IO
+  value: 304
+  description: PathNotFoundWarning - path is not found, but recoverable
+
+  # Core specific errors
+
+# -----------------------------------------------------------------------------
+#   Domain error codes
+# -----------------------------------------------------------------------------
+- code: DOM-UNK-UNK-400
+  layer: DOM
+  service: UNK
+  category: UNK
+  value: 400
+  description: Base domain error - Dont use
+
+  # Domain sub errors
+
+  # Domain specific errors
+
+# -----------------------------------------------------------------------------
+#   Infrastructure error codes
+# -----------------------------------------------------------------------------
+- code: INF-UNK-UNK-500
+  layer: INF
+  service: UNK
+  category: UNK
+  value: 500
+  description: Base infrastructure error - Dont use
+
+  # Infrastructure general sub errors
+
+- code: INF-UNK-LOOK-501
+  layer: INF
+  service: UNK
+  category: LOOK
+  value: 501
+  description: Failure to lookup something
+- code: INF-UNK-LOOK-502
+  layer: INF
+  service: UNK
+  category: LOOK
+  value: 502
+  description: Required values are missing
+- code: INF-UNK-LOOK-503
+  layer: INF
+  service: UNK
+  category: LOOK
+  value: 503
+  description: Accessing nonexistent registry
+- code: INF-UNK-CFG-504
+  layer: INF
+  service: UNK
+  category: CFG
+  value: 504
+  description: Configuration-related error
+
+  # Infrastructure specific errors
+
+- code: INF-CFGB-LOOK-521
+  layer: INF
+  service: CFGB
+  category: LOOK
+  value: 521
+  description: Config model does not have name or path
+- code: INF-CFGB-LOOK-522
+  layer: INF
+  service: CFGB
+  category: LOOK
+  value: 522
+  description: Config model does not have format or date format
+- code: INF-CFGB-LOOK-523
+  layer: INF
+  service: CFGB
+  category: LOOK
+  value: 523
+  description: Config model does not have file output path
+- code: INF-CFGB-LOOK-524
+  layer: INF
+  service: CFGB
+  category: LOOK
+  value: 524
+  description: Config model does not have file or console handler
+- code: INF-CFGB-LOOK-525
+  layer: INF
+  service: CFGB
+  category: LOOK
+  value: 525
+  description: Looking up a nonexistent config builder type
+- code: INF-LOGR-LOOK-526
+  layer: INF
+  service: LOGR
+  category: LOOK
+  value: 526
+  description: Tried to create duplication of a service logger
+- code: INF-TDET-CFG-527
+  layer: INF
+  service: TDET
+  category: CFG
+  value: 527
+  description: Failed to detect a config type
